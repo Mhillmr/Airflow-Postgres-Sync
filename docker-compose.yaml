@@ -1,0 +1,57 @@
+# docker-compose.example.yaml
+# Example Docker Compose for Airflow + Postgres + Redis
+# Copy this file to docker-compose.yaml and fill in your values.
+
+version: "3.9"
+
+services:
+  postgres:
+    image: postgres:13
+    environment:
+      POSTGRES_USER: <YOUR_DB_USER>
+      POSTGRES_PASSWORD: <YOUR_DB_PASSWORD>
+      POSTGRES_DB: <YOUR_DB_NAME>
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "<YOUR_DB_USER>"]
+      interval: 10s
+      retries: 5
+      start_period: 5s
+    restart: always
+
+  redis:
+    image: redis:7.2-bookworm
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      retries: 5
+    restart: always
+
+  airflow-webserver:
+    image: apache/airflow:3.0.4
+    environment:
+      AIRFLOW__CORE__EXECUTOR: CeleryExecutor
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://<YOUR_DB_USER>:<YOUR_DB_PASSWORD>@postgres/<YOUR_DB_NAME>
+      AIRFLOW__CELERY__RESULT_BACKEND: db+postgresql://<YOUR_DB_USER>:<YOUR_DB_PASSWORD>@postgres/<YOUR_DB_NAME>
+      AIRFLOW__CELERY__BROKER_URL: redis://:@redis:6379/0
+      AIRFLOW__CORE__FERNET_KEY: '<YOUR_FERNET_KEY>'
+      AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: 'true'
+      AIRFLOW__CORE__LOAD_EXAMPLES: 'false'
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./dags:/opt/airflow/dags
+      - ./logs:/opt/airflow/logs
+      - ./plugins:/opt/airflow/plugins
+    depends_on:
+      - postgres
+      - redis
+    restart: always
+
+volumes:
+  postgres-data:

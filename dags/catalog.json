@@ -1,0 +1,33 @@
+{
+  "batch_size": 20000,
+  "retry_count": 3,
+  "retry_delay_seconds": 60,
+  "parallel_tasks": 4,
+  "monitoring": {
+    "enable_metrics": true,
+    "metric_prefix": "pg2pg"
+  },
+  "optimize_after_sync": true,
+  "dst_pg_conn_id": "<DEST_POSTGRES_CONN_ID>",
+  "sources": [
+    {
+      "pg_conn_id": "<SOURCE_POSTGRES_CONN_ID>",
+      "dst_pg_conn_id": "<DEST_POSTGRES_CONN_ID>",
+      "tables": [
+        {
+          "pg_schema": "public",
+          "pg_table": "<TABLE_NAME>",
+          "sync_method": "full_replace",
+          "primary_key": "<PRIMARY_KEY_COLUMN>",
+          "incremental_column": "<TIMESTAMP_COLUMN or null>",
+          "validate": true,
+          "validate_checksums": false,
+          "batch_size": 50000,
+          "retry_count": 2,
+          "has_hard_delete": false,
+          "comments": "Example table - synced hourly"
+        }
+      ]
+    }
+  ]
+}
