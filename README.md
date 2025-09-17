@@ -1,4 +1,3 @@
-````markdown
 # PostgreSQL-to-PostgreSQL Data Sync and Validation with Airflow
 
 This project is designed to synchronize and validate data between two PostgreSQL databases using Apache Airflow. It provides a robust framework for managing data synchronization tasks, ensuring data consistency, and alerting users in case of mismatches or inconsistencies.
